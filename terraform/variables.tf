@@ -5,3 +5,6 @@ variable "aws_region" {
 variable "project_name" {
   default = "project-bedrock"
 }
+variable "project_tag" {
+  default = "karatu-2025-capstone"
+}
