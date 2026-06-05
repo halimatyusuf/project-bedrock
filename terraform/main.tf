@@ -206,3 +206,58 @@ resource "aws_security_group" "eks_sg" {
     Name = "project-bedrock-eks-sg"
   })
 }
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "project-bedrock-cluster-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Project = "karatu-2025-capstone"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+resource "aws_eks_cluster" "main" {
+  name     = "project-bedrock-cluster"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+  version  = "1.34"
+
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.private_1.id,
+      aws_subnet.private_2.id
+    ]
+
+    security_group_ids = [aws_security_group.eks_sg.id]
+  }
+
+  enabled_cluster_log_types = [
+    "api",
+    "audit",
+    "authenticator",
+    "controllerManager",
+    "scheduler"
+  ]
+
+  tags = {
+    Project = "karatu-2025-capstone"
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_cluster_policy
+  ]
+}
