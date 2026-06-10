@@ -23,3 +23,11 @@ output "assets_bucket_name" {
 # output "cluster_name" {
 #   value = try(aws_eks_cluster.main.name, "")
 # }
+output "dev_access_key_id" {
+  value = aws_iam_access_key.dev_view_key.id
+}
+
+output "dev_secret_access_key" {
+  value     = aws_iam_access_key.dev_view_key.secret
+  sensitive = true
+}
